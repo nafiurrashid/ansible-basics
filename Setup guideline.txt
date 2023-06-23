@@ -1,0 +1,98 @@
+========> Ansible Control and Client Node Setup <========
+
+Requirments:
+------------
+
+    1. Ansible control node: CentOS 7
+    2. Client node-1: Ubuntu 22.04 LTS
+    3. Clent node-1: CentOS 7
+
+
+> Install centos 7 as master node on virtualbox.
+
+> Install centos 7 and ubuntu 22.04 as client node.
+
+Ansible master node:
+--------------------
+> Basic setup for ansible master node:
+    > Configure IP address
+        nmtui
+    > Install basic necessary packages
+        yum install vim curl wget open-vm-tools -y
+    > Disable selinux security policy
+        vim /etc/selinux/config
+    > Disable firewalld
+        systemctl stop firewalld
+        systemctl disable firewalld
+    > Setup node hostname
+        vim /etc/hostname
+
+ansible-master.localdomain
+    
+    > Setup local dns name resolution
+        vim /etc/hosts
+
+192.168.55.100  ansible-master.localdomain      ansible-master
+192.168.55.200  centosclient-1.localdomain      centosclient-1
+192.168.55.201  ubuntuclient-1.localdomain      ubuntuclient-1
+
+> Create a user for deployment "username = ansible"
+    useradd ansible
+
+> Switch to "ansible" user
+    su - ansible
+
+> Setup key base password less authentication
+    ssh-keygen
+
+> Copy id_rsa.pub to all client node as authorized_keys
+
+
+Client node setup:
+-----------------
+> Check the internet connectivity first
+
+> Setup hostname
+    vim /etc/hostname
+
+ubuntuclient-2.localdomain
+
+> Setup local dns name resolution
+    vim /etc/hosts
+
+192.168.55.100  ansible-master.localdomain      ansible-master
+192.168.55.200  centosclient-1.localdomain      centosclient-1
+192.168.55.201  ubuntuclient-2.localdomain      ubuntuclient-2
+
+> Create a user for deployment "username = ansible"
+    useradd ansible
+> Update sudoers file for passwordless authentication
+    vim /etc/sudoers.d/ansible
+
+    add this line:
+    ansible        ALL=(ALL)       NOPASSWD: ALL
+
+> Switch to ansible user for keybase authentication
+    su - ansible
+> Create .ssh directory at ansible user home
+    mkdir .ssh
+    chmod 700 .ssh
+    cd .ssh
+    vim authorized_keys    #[copy id_rsa.pub from master-node "ansible" user to all client-node as authorized_keys]
+    chmod 600 authorized_keys
+
+===========================> Ansible installation and configuration <====================================
+
+Ansible master node:
+--------------------
+> Install Ansible on master node using epel repository.
+    yum install epel-release -y 
+    yum install ansible -y 
+
+> Configure ansible.cfg file
+    vim /etc/ansible/ansible.cfg
+
+> configure inventory file
+    vim /etc/ansible/hosts
+
+
